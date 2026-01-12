@@ -1,0 +1,23 @@
+{
+  "skill": "skill-with-assets",
+  "purpose": "Demonstrate bundled configuration files",
+  "settings": {
+    "auto_trigger": false,
+    "progressive_disclosure": true,
+    "load_references": "on-demand"
+  },
+  "metadata": {
+    "created": "2026-01-09",
+    "version": "1.0.0",
+    "author": "Yoshi Watanabe"
+  },
+  "examples": {
+    "use_cases": [
+      "Configuration templates",
+      "Test fixtures",
+      "Reference data",
+      "Static mappings"
+    ]
+  },
+  "notes": "This file demonstrates that skills can bundle structured data files alongside documentation and scripts."
+}
