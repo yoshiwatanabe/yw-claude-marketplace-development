@@ -1,0 +1,6 @@
+# This directory is intentionally empty.
+# Calculator server uses only Python standard library (json, sys).
+# No external dependencies need to be vendored.
+#
+# The run.py wrapper will check for this directory at runtime,
+# but it won't add anything to sys.path since nothing is here.
