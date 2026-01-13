@@ -1,0 +1,2 @@
+# Calculator server has no external dependencies
+# Uses only Python standard library (json, sys)
