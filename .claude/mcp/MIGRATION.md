@@ -62,7 +62,33 @@ ls -R ../yw-claude-marketplace-demo/plugins/demo-mcp/servers/
 # Should show: echo-server/, calculator-server/, weather-server/
 ```
 
-### Step 2: Create plugin.json
+### Step 2: Update Marketplace Catalog
+
+In the marketplace repo, update `.claude-plugin/marketplace.json` to include the new plugin:
+
+```json
+{
+  "name": "yw-claude-marketplace-demo",
+  "description": "[DEMO] Claude extensibility features",
+  "owner": { ... },
+  "plugins": [
+    {
+      "name": "demo-commands",
+      "source": "./plugins/demo-commands",
+      "description": "Slash command patterns: simple, arguments, workflows"
+    },
+    {
+      "name": "demo-mcp",
+      "source": "./plugins/demo-mcp",
+      "description": "MCP server patterns: minimal, multiple tools, external API"
+    },
+    // ... other plugins ...
+  ]
+}
+```
+
+
+### Step 3: Create plugin.json
 
 Create `plugins/demo-mcp/plugin.json` in the marketplace repo:
 
@@ -74,7 +100,7 @@ Create `plugins/demo-mcp/plugin.json` in the marketplace repo:
 }
 ```
 
-### Step 3: Create README.md
+### Step 4: Create README.md
 
 Create `plugins/demo-mcp/README.md` in the marketplace repo with user-facing documentation:
 
@@ -134,6 +160,31 @@ Ask Claude: "What's the weather in Berlin?" or "Get weather for latitude 40.71, 
 - Tool used: get_weather
 - Returns current conditions + 3-hour forecast
 - Uses Open-Meteo API (no auth required)
+
+### Step 5: Test in Marketplace
+
+```bash
+cd ../yw-claude-marketplace-demo
+
+# Test locally
+/plugin marketplace add file:///absolute/path/to/yw-claude-marketplace-demo
+/plugin install demo-mcp@yw-claude-marketplace-demo
+
+# Test the servers
+# In Claude Code, try:
+# "Echo hello"
+# "What is 15 + 27?"
+# "What's the weather in Berlin (52.52, 13.41)?"
+```
+
+### Step 6: Commit and Push
+
+```bash
+cd ../yw-claude-marketplace-demo
+git add -A
+git commit -m "Add demo-mcp plugin - MCP server examples"
+git push origin main
+```
 
 ## Architecture
 
