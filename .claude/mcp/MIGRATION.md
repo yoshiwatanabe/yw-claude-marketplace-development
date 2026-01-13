@@ -42,11 +42,38 @@ yw-claude-marketplace-demo/
             └── requirements.txt
 ```
 
+## Key Innovation: Vendored Dependencies
+
+Starting with this version, MCP servers use **vendored dependencies** - dependencies are bundled directly in the plugin. This means:
+
+✅ End users don't need to run `pip install`
+✅ No manual setup required
+✅ Works immediately after installation
+✅ Dependencies are isolated per server
+
+The `run.py` wrapper in each server directory adds the vendored dependencies to Python's path before running the actual server.
+
 ## Migration Steps
+
+### Step 0: Prepare Development Project (One-time Setup)
+
+Before copying to marketplace, ensure vendored dependencies are prepared:
+
+```bash
+# Run this in the development project
+node .claude/mcp/scripts/vendor-dependencies.js
+
+# This will:
+# 1. Find all servers with requirements.txt
+# 2. Install dependencies into servers/[name]/vendored/
+# 3. Create run.py wrappers (if not already present)
+```
+
+Commit the vendored directories so they're distributed with the plugin.
 
 ### Step 1: Copy MCP Servers Directory
 
-Copy the entire `servers/` directory and `.mcp.json` to the marketplace plugin:
+Copy the entire `servers/` directory (including vendored dependencies!) and `.mcp.json` to the marketplace plugin:
 
 ```bash
 # From: yw-claude-marketplace-development
@@ -62,7 +89,37 @@ ls -R ../yw-claude-marketplace-demo/plugins/demo-mcp/servers/
 # Should show: echo-server/, calculator-server/, weather-server/
 ```
 
-### Step 2: Update Marketplace Catalog
+### Step 2: Update .mcp.json for Marketplace Paths
+
+The `.mcp.json` needs to be updated to reflect the different directory structure in the marketplace:
+
+**Development** (.claude/mcp/.mcp.json):
+```json
+{
+  "mcpServers": {
+    "echo": {
+      "command": "python",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/.claude/mcp/servers/echo-server/run.py"]
+    }
+  }
+}
+```
+
+**Marketplace** (plugins/demo-mcp/.mcp.json):
+```json
+{
+  "mcpServers": {
+    "echo": {
+      "command": "python",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/servers/echo-server/run.py"]
+    }
+  }
+}
+```
+
+The key difference: remove the `.claude/mcp/` prefix since servers are at the plugin root in the marketplace.
+
+### Step 3: Update Marketplace Catalog
 
 In the marketplace repo, update `.claude-plugin/marketplace.json` to include the new plugin:
 
@@ -88,7 +145,7 @@ In the marketplace repo, update `.claude-plugin/marketplace.json` to include the
 ```
 
 
-### Step 3: Create plugin.json
+### Step 4: Create plugin.json
 
 Create `plugins/demo-mcp/plugin.json` in the marketplace repo:
 
@@ -100,7 +157,7 @@ Create `plugins/demo-mcp/plugin.json` in the marketplace repo:
 }
 ```
 
-### Step 4: Create README.md
+### Step 5: Create README.md
 
 Create `plugins/demo-mcp/README.md` in the marketplace repo with user-facing documentation:
 
@@ -117,13 +174,14 @@ Hello World examples for Claude Code MCP (Model Context Protocol) server integra
 
 ### Dependencies
 
-The weather server requires the `requests` library:
+All dependencies are **pre-bundled** with the plugin using vendored dependencies. No manual installation required!
 
-\`\`\`bash
-pip install requests
-\`\`\`
+The plugin includes:
+- weather-server: requests library (vendored)
+- echo-server: Python standard library only
+- calculator-server: Python standard library only
 
-(Or install all server dependencies: \`pip install -r plugins/demo-mcp/servers/weather-server/requirements.txt\`)
+Just install and use - everything works out of the box.
 
 ## Available Servers
 
@@ -161,7 +219,7 @@ Ask Claude: "What's the weather in Berlin?" or "Get weather for latitude 40.71, 
 - Returns current conditions + 3-hour forecast
 - Uses Open-Meteo API (no auth required)
 
-### Step 5: Test in Marketplace
+### Step 6: Test in Marketplace
 
 ```bash
 cd ../yw-claude-marketplace-demo
@@ -177,7 +235,7 @@ cd ../yw-claude-marketplace-demo
 # "What's the weather in Berlin (52.52, 13.41)?"
 ```
 
-### Step 6: Commit and Push
+### Step 7: Commit and Push
 
 ```bash
 cd ../yw-claude-marketplace-demo
