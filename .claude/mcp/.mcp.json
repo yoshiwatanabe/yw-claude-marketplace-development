@@ -1,15 +1,15 @@
 {
   "mcpServers": {
     "echo": {
-      "command": "python",
+      "command": "python3",
       "args": ["${CLAUDE_PLUGIN_ROOT}/.claude/mcp/servers/echo-server/run.py"]
     },
     "calculator": {
-      "command": "python",
+      "command": "python3",
       "args": ["${CLAUDE_PLUGIN_ROOT}/.claude/mcp/servers/calculator-server/run.py"]
     },
     "weather": {
-      "command": "python",
+      "command": "python3",
       "args": ["${CLAUDE_PLUGIN_ROOT}/.claude/mcp/servers/weather-server/run.py"]
     }
   }
