@@ -11,16 +11,30 @@ yw-claude-marketplace-development/
     ├── .mcp.json
     ├── README.md
     ├── MIGRATION.md (this file)
+    ├── scripts/
+    │   └── vendor-dependencies.js
     └── servers/
         ├── echo-server/
         │   ├── server.py
-        │   └── requirements.txt
+        │   ├── run.py
+        │   ├── requirements.txt
+        │   └── vendored/
+        │       └── .gitkeep
         ├── calculator-server/
         │   ├── server.py
-        │   └── requirements.txt
+        │   ├── run.py
+        │   ├── requirements.txt
+        │   └── vendored/
+        │       └── .gitkeep
         └── weather-server/
             ├── server.py
-            └── requirements.txt
+            ├── run.py
+            ├── requirements.txt
+            └── vendored/
+                ├── requests/
+                ├── urllib3/
+                ├── certifi/
+                └── ...
 ```
 
 **Marketplace Repository** (destination):
@@ -33,13 +47,25 @@ yw-claude-marketplace-demo/
     └── servers/
         ├── echo-server/
         │   ├── server.py
-        │   └── requirements.txt
+        │   ├── run.py
+        │   ├── requirements.txt
+        │   └── vendored/
+        │       └── .gitkeep
         ├── calculator-server/
         │   ├── server.py
-        │   └── requirements.txt
+        │   ├── run.py
+        │   ├── requirements.txt
+        │   └── vendored/
+        │       └── .gitkeep
         └── weather-server/
             ├── server.py
-            └── requirements.txt
+            ├── run.py
+            ├── requirements.txt
+            └── vendored/
+                ├── requests/
+                ├── urllib3/
+                ├── certifi/
+                └── ...
 ```
 
 ## Key Innovation: Vendored Dependencies
@@ -248,26 +274,28 @@ git push origin main
 
 ### Server Configuration (.mcp.json)
 
-Maps server names to Python executables:
+Maps server names to Python executables via the `run.py` wrappers:
 
 ```json
 {
   "mcpServers": {
     "echo": {
       "command": "python",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/servers/echo-server/server.py"]
+      "args": ["${CLAUDE_PLUGIN_ROOT}/servers/echo-server/run.py"]
     },
     "calculator": {
       "command": "python",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/servers/calculator-server/server.py"]
+      "args": ["${CLAUDE_PLUGIN_ROOT}/servers/calculator-server/run.py"]
     },
     "weather": {
       "command": "python",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/servers/weather-server/server.py"]
+      "args": ["${CLAUDE_PLUGIN_ROOT}/servers/weather-server/run.py"]
     }
   }
 }
 ```
+
+**Important:** Entry points must use `run.py` (the wrapper), not `server.py`. The wrapper ensures vendored dependencies are added to Python's path before the actual server code runs.
 
 ### Tool Definitions
 
@@ -283,8 +311,8 @@ Claude automatically discovers and uses these tools.
 ### List Available Tools
 
 \`\`\`bash
-# Test any server's tool definitions
-echo '{"method": "tools/list"}' | python3 servers/echo-server/server.py
+# Test any server's tool definitions using the run.py wrapper
+echo '{"method": "tools/list"}' | python3 servers/echo-server/run.py
 \`\`\`
 
 ### Call a Tool
@@ -292,13 +320,15 @@ echo '{"method": "tools/list"}' | python3 servers/echo-server/server.py
 \`\`\`bash
 # Test calculator add
 echo '{"method": "tools/call", "params": {"name": "add", "arguments": {"a": 15, "b": 27}}}' \\
-  | timeout 1 python3 servers/calculator-server/server.py
+  | timeout 1 python3 servers/calculator-server/run.py
 # Response: {"content": [{"type": "text", "text": "Result: 42"}]}
 
 # Test weather
 echo '{"method": "tools/call", "params": {"name": "get_weather", "arguments": {"latitude": 52.52, "longitude": 13.41}}}' \\
-  | timeout 3 python3 servers/weather-server/server.py
+  | timeout 3 python3 servers/weather-server/run.py
 \`\`\`
+
+**Note:** Always use `run.py` when testing, not `server.py`. The wrapper ensures vendored dependencies are available.
 
 ## File Structure Reference
 
